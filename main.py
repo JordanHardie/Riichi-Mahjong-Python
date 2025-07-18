@@ -1,14 +1,11 @@
 import random
-from models import GameState, Player
-from enums import Winds, CallTypes, DiscardType
-from tile_utils import generate_tiles, sort_tiles
-from wall_utils import draw_tiles_from_wall, get_last_discarded_tile
-from game_logic import (
-    increment_turn, next_enum, get_current_player, can_call_pon, 
-    can_call_chii, can_call_kan, make_call, get_closed_kan_options
-)
-from player_actions import discard_tile, display_calls
-from ui import send_message, input_message
+from ui import *
+from enums import *
+from models import *
+from tile_utils import *
+from wall_utils import *
+from game_logic import *
+from player_actions import *
 
 # Constants
 HAND_SIZE = 13
@@ -95,3 +92,110 @@ def run_game() -> None:
                         called_tile = True
                     else:
                         send_message("Failed to make PON call")
+                elif call_choice == "CHII" and can_chii:
+                    if make_call(current_player, CallTypes.CHII, last_tile, last_discarder):
+                        send_message(f"Called CHII on {last_tile}")
+                        called_tile = True
+                    else:
+                        send_message("Failed to make CHII call")
+                elif call_choice == "KAN" and can_open_kan:
+                    if make_call(current_player, CallTypes.OPEN_KAN, last_tile, last_discarder):
+                        send_message(f"Called KAN on {last_tile}")
+                        called_tile = True
+                    else:
+                        send_message("Failed to make KAN call")
+
+        # Draw tile if no call was made
+        if not called_tile:
+            drawn_tiles = draw_tiles_from_wall(game_state.wall, 1)
+            if drawn_tiles:
+                current_player.drawn_tile = drawn_tiles[0]
+            else:
+                send_message("No tiles left to draw")
+                break
+        else:
+            # After calling (except closed kan), player draws from dead wall for kan or doesn't draw for pon/chii
+            if current_player.calls and current_player.calls[-1]["call_type"] in [CallTypes.OPEN_KAN, CallTypes.CLOSED_KAN, CallTypes.ADDED_KAN]:
+                # For kan, draw replacement tile (simplified: draw from regular wall)
+                drawn_tiles = draw_tiles_from_wall(game_state.wall, 1)
+                if drawn_tiles:
+                    current_player.drawn_tile = drawn_tiles[0]
+            # For pon/chii, no tile is drawn
+            
+        increment_turn(game_state)
+
+        if current_player.seat == Winds.EAST:
+            # Check for closed kan and added kan options during East's turn
+            can_open_kan, can_add_kan, can_closed_kan = can_call_kan(current_player.hand, "", current_player.calls)
+            
+            if can_closed_kan or can_add_kan:
+                kan_options = []
+                if can_closed_kan:
+                    closed_kan_tiles = get_closed_kan_options(current_player.hand)
+                    kan_options.extend([f"ANKAN-{tile}" for tile in closed_kan_tiles])
+                if can_add_kan:
+                    # Find which pon can be upgraded
+                    for call in current_player.calls:
+                        if call["call_type"] == CallTypes.PON:
+                            pon_tile = call["tiles"][0]
+                            if pon_tile in current_player.hand:
+                                kan_options.append(f"SHOUMINKAN-{pon_tile}")
+                
+                if kan_options:
+                    send_message(f"Available kans: {', '.join(kan_options)} (or SKIP)")
+                    kan_choice = input_message("Choose kan or SKIP: ").upper()
+                    
+                    if kan_choice.startswith("ANKAN-"):
+                        kan_tile = kan_choice[6:]  # Remove "ANKAN-" prefix
+                        if make_call(current_player, CallTypes.CLOSED_KAN, "", current_player, kan_tile):
+                            send_message(f"Called closed KAN on {kan_tile}")
+                            # Draw replacement tile
+                            drawn_tiles = draw_tiles_from_wall(game_state.wall, 1)
+                            if drawn_tiles:
+                                current_player.drawn_tile = drawn_tiles[0]
+                    elif kan_choice.startswith("SHOUMINKAN-"):
+                        kan_tile = kan_choice[11:]  # Remove "SHOUMINKAN-" prefix
+                        if make_call(current_player, CallTypes.ADDED_KAN, "", current_player, kan_tile):
+                            send_message(f"Called added KAN on {kan_tile}")
+                            # Draw replacement tile
+                            drawn_tiles = draw_tiles_from_wall(game_state.wall, 1)
+                            if drawn_tiles:
+                                current_player.drawn_tile = drawn_tiles[0]
+
+            for i, tile in enumerate(current_player.hand):
+                if i != len(current_player.hand) - 1:
+                    display_hand += f"{tile}, "
+                else:
+                    display_hand += f"{tile}"
+
+            if current_player.drawn_tile:
+                display_hand += f" | {current_player.drawn_tile}"
+            
+            # Add calls display
+            display_hand += display_calls(current_player)
+
+            send_message(display_hand)
+
+            while True:
+                tile_to_discard = input_message("What will you discard?: ")
+                tile_to_discard = tile_to_discard.upper()
+
+                # We check to see if the discarded tile matches the drawn tile first,
+                # Since its more likely the player wants to discard that first rather than anything in their hand.
+                if tile_to_discard == current_player.drawn_tile:
+                    discard_tile(current_player, tile_to_discard, DiscardType.TSUMOGIRI)
+                    break
+                elif tile_to_discard in current_player.hand:
+                    discard_tile(current_player, tile_to_discard, DiscardType.TEDASHI)
+                    break
+                else:
+                    send_message("Invalid tile. Please try again.")
+
+        else:
+            if current_player.drawn_tile:
+                discard_tile(current_player, current_player.drawn_tile, DiscardType.TSUMOGIRI)
+
+        game_state.current_player = next_enum(game_state.current_player)
+
+if __name__ == "__main__":
+    run_game()
