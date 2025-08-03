@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 # region Tile enums
 class Suits(Enum):
     MAN = 1
@@ -13,6 +14,7 @@ class Suits(Enum):
     SOU = 3
     '''Bamboo.'''
     BAMBOO = 3 # alias
+
 
 class Winds(Enum):
     TON = 1
@@ -31,6 +33,7 @@ class Winds(Enum):
     '''North wind.'''
     NORTH = 4 # alias
 
+
 class Dragons(Enum):
     HAKU = 5
     '''White dragon.'''
@@ -45,6 +48,21 @@ class Dragons(Enum):
     RED = 7 # alias
 # endregion
 
+
+class Furiten(Enum):
+    NONE = 0
+    DISCARD = 1
+    TEMPORARY = 2
+    PERMANENT = 3
+
+
+class DiscardType(Enum):
+    TEDASHI = 1
+    """Tedashi refers to discarding a tile already in the hand."""
+    TSUMOGIRI = 2
+    """Tsumogiri refers to discarding the tile just drawn."""
+
+
 class Calls(Enum):
     NONE = 0
     CHII = 1
@@ -53,6 +71,7 @@ class Calls(Enum):
     CLOSED_KAN = 4
     ADDED_KAN = 5
     KITA = 6
+
 
 class Melds(Enum):
     NONE = 0
@@ -84,9 +103,3 @@ class Melds(Enum):
     SHOUMINKAN = 7
     '''Added quad.'''
     ADDED_QUAD = 7 # alias
-
-class Furiten(Enum):
-    NONE = 0
-    DISCARD = 1
-    TEMPORARY = 2
-    PERMANENT = 3
