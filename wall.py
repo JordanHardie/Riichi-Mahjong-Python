@@ -1,7 +1,6 @@
 import random
 from enums import Winds, Dragons
 from utils import format_tile_name
-from typing import List, Dict, Optional
 
 # Constants
 COPIES = 4
@@ -12,28 +11,28 @@ KAN_DRAW_WALL_SIZE = 4
 
 class Wall():
     def __init__(self):
-        self.wall: List[str] = []
-        self.dead_wall: List[str] = []
-        self.kan_draw_stack: List[str] = []
-        self.dora_indicators: List[Dict] = [] # {'tile': isRevealed:bool}, i.e. {'5M': True}
-        self.ura_dora_indicators: List[str] = [] # This one is only a list since it only matters if they are in riichi.
+        self.wall: list[str] = []
+        self.dead_wall: list[str] = []
+        self.kan_draw_stack: list[str] = []
+        self.dora_indicators: list[dict] = [] # {'tile': isRevealed:bool}, i.e. {'5M': True}
+        self.ura_dora_indicators: list[str] = [] # This one is only a list since it only matters if they are in riichi.
 
     def setup_walls(self, game_state) -> None:
         self.setup_main_wall(game_state)
-        self.setup_dead_wall(game_state)
+        self.setup_dead_wall()
 
-    def draw_tile(self, wall: Optional[List[str]] = None) -> str:
+    def draw_tile(self, wall: list[str] | None = None) -> str:
         """Draw one tile from a given wall.
         \n If no wall is given it will default to the main wall."""
         return self.draw_tiles(1, wall)[0]
 
-    def append_tile_to_wall(self, value: int, suit: int | str, wall: Optional[List[str]] = None) -> None:
+    def append_tile_to_wall(self, value: int, suit: int | str, wall: list[str] | None = None) -> None:
         if wall == None:
             wall = self.wall
 
         wall.append(format_tile_name(value, suit))
 
-    def draw_tiles(self, amount, wall: Optional[List[str]] = None) -> List[str]:
+    def draw_tiles(self, amount, wall: list[str] | None = None) -> list[str]:
         """Draw tiles from a given wall.
         \n If no wall is given it will default to the main wall."""
         if wall == None:
@@ -48,7 +47,7 @@ class Wall():
 
         return tiles
 
-    def setup_dead_wall(self, game_state) -> None:
+    def setup_dead_wall(self) -> None:
         # Dead wall setup.
         self.dead_wall = self.draw_tiles(-DEAD_WALL_SIZE)
         self.kan_draw_stack = self.dead_wall[:KAN_DRAW_WALL_SIZE]

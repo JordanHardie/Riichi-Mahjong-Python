@@ -1,8 +1,6 @@
 import random
 from utils import *
 from wall import Wall
-from typing import Set, List
-from dataclasses import dataclass
 from enums import Calls, Winds, Furiten, DiscardType
 
 HAND_SIZE = 13
@@ -15,20 +13,9 @@ class DiscardedTile():
         self.discard_type: DiscardType = DiscardType.TSUMOGIRI
 
 
-@dataclass
-class CallOption:
-    call_type: Calls
-    tiles_used: List[str]
-    kuikae_restrictions: Set[str]
-    """Kuikae is a rule which, when making a call, prevents you from immediately discarding a tile that could have completed that call. 
-    \n Under kuikae, calling pon on a 5-pin, then discarding a 5-pin is not allowed. 
-    \n Similarly, after calling chii on a 4-sou with 23-sou, you cannot discard a 1-sou or 4-sou. 
-    \n You are allowed to discard these tiles on any turn afterwards, just not on the turn you made the call."""
-
-
 class CalledTile():
     def __init__(self) -> None:
-        self.tiles: List[str] = []
+        self.tiles: list[str] = []
         self.call_type: Calls = Calls.NONE
         self.called_from: Winds = Winds.EAST
         self.discard_type: DiscardType = DiscardType.TEDASHI
@@ -40,11 +27,12 @@ class Player():
         self.points: int = 25000
 
         self.drawn_tile: str = ""
-        self.hand: List[str] = []
-        self.calls: List[CalledTile] = []
-        self.discard_pile: List[DiscardedTile] = []
+        self.hand: list[str] = []
+        self.calls: list[CalledTile] = []
+        self.discard_pile: list[DiscardedTile] = []
 
         self.tenpai: bool = False
+        self.is_in_riichi: bool = False
         self.furiten_status: Furiten = Furiten.NONE
 
 
@@ -67,12 +55,12 @@ class GameState():
 
         self.repeats: int = 0
         self.kan_count: int = 0
-        self.riichi_bets: List[Winds] = [] # List of players who have riichi'd.
+        self.riichi_bets: int = 0
 
         self.turn_number: int = 0
         self.round_number: int = 0
 
-        self.players: List[Player] = []
+        self.players: list[Player] = []
         self.current_player: Winds = Winds.EAST
         self.previous_player: Winds = Winds.EAST
         self.current_round_wind: Winds = Winds.EAST

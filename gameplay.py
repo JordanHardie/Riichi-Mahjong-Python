@@ -4,9 +4,12 @@ from call_logic import can_call
 from game_manager import setup_game, Player, DiscardedTile, game_state
 
 
-def update_current_players() -> None:
+def update_current_players(current_player: Player | None = None) -> None:
     game_state.previous_player = game_state.current_player
-    game_state.current_player = get_next_enum(game_state.current_player)
+    if current_player is not None:
+        game_state.current_player = current_player.seat
+    else:
+        game_state.current_player = get_next_enum(game_state.current_player)
 
 
 def _format_calls(calls) -> str:
@@ -22,7 +25,8 @@ def _format_calls(calls) -> str:
     return " | ".join(formatted_calls)
 
 
-def normalize_tile_input(user_input: str) -> str:
+# Debating on whether or not to put this in utils.
+def normalize_tile_input(user_input: str) -> str: 
     honor_input_map = {
         # Winds  
         "e": "1Z", "east": "1Z",
@@ -142,9 +146,17 @@ def run_game() -> None:
     update_current_players()
 
     for player in game_state.players:
+        # If they are in riichi, they cannot change their hand.
+        # They can do concealed kan if it doesn't mess with their waits though.
+        # For now I'll just skip that player since I don't really have that setup yet.
+        # TODO: Add concealed kan checking for riichi.
+        if player.is_in_riichi:
+            continue
+
         calls = can_call(player)
+
         for call in calls:
             if call.call_type == Calls.NONE:
-                break
+                continue
 
 run_game()

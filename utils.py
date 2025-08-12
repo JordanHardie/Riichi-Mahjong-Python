@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, TypeVar
+from typing import TypeVar
 
 # Constants
 En = TypeVar('En', bound=Enum)
@@ -13,14 +13,28 @@ def send_input(_input:str) -> str:
     return input(f"\n{_input}")
 
 
-def sort_tiles(tiles: List[str]):
+def sort_tiles(tiles: list[str]):
     return sorted(tiles, key=sort_key)
 
 
-def extract_tile_values(tile: str) -> tuple:
+def extract_tile_values(tile: str) -> tuple[int, str]:
     value: int = int(tile[0])
     suit: str = tile[1]
     return value, suit
+
+
+def extract_tile_list_values(tiles: list[str]) -> tuple[list[int], list[str]]:
+    """Extract numeric values and suits from tile list."""
+    tiles = sort_tiles(tiles)
+    values: list[int] = []
+    suits: list[str] = []
+
+    for tile in tiles:
+        value, suit = extract_tile_values(tile)
+        suits.append(suit)
+        values.append(value)
+
+    return values, suits
 
 
 def is_number_tile(tile: str) -> bool:
