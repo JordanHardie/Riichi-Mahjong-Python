@@ -93,3 +93,4 @@ class Wall():
             self.append_tile_to_wall(0, suit)
 
         random.shuffle(wall)
+        # Pasta
