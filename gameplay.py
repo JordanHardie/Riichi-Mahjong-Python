@@ -5,6 +5,8 @@ from game_manager import setup_game, Player, DiscardedTile, game_state
 
 
 def update_current_players(current_player: Player | None = None) -> None:
+    """Update the current player to the next one in the game.
+    \n If current_player is provided, it will set that player as the current player."""
     game_state.previous_player = game_state.current_player
     if current_player is not None:
         game_state.current_player = current_player.seat
@@ -27,6 +29,7 @@ def _format_calls(calls) -> str:
 
 # Debating on whether or not to put this in utils.
 def normalize_tile_input(user_input: str) -> str: 
+    """Normalize user input for tile names."""
     honor_input_map = {
         # Winds  
         "e": "1Z", "east": "1Z",
@@ -48,6 +51,7 @@ def normalize_tile_input(user_input: str) -> str:
 
 
 def display_current_players_status(current_player: Player) -> None:
+    """Display the current player's status, including their hand, drawn tile, and discard pile."""
     # Header with seat and round wind.
     header = f"Seat: {clarify_tile(current_player.seat, 2)} | Round wind: {clarify_tile(game_state.current_round_wind, 2)}"
     send_message(header)
@@ -69,6 +73,9 @@ def display_current_players_status(current_player: Player) -> None:
 
 
 def clarify_tile(tile_or_enum: str | Winds | Dragons, type: int) -> str:
+    """Clarify a tile or enum to a string representation.
+    \n Type 1 returns a simple representation (e.g., 'East').
+    \n Type 2 returns a full representation (e.g., 'East Wind')."""
     honor_tiles = {
         # Winds (by enum and by value).
         Winds.TON: ("E", "East"), 1: ("E", "East"),
@@ -100,6 +107,7 @@ def clarify_tile(tile_or_enum: str | Winds | Dragons, type: int) -> str:
 
 
 def discard_tile(player: Player, tile: str, discard_type: DiscardType) -> None:
+    """Discard a tile from the player's hand and update their discard pile."""
     discarded_by = player.seat
     discard_pile = player.discard_pile
 
@@ -119,6 +127,7 @@ def discard_tile(player: Player, tile: str, discard_type: DiscardType) -> None:
 
 
 def draw_and_discard_tile(current_player: Player) -> None:
+    """Draw a tile from the wall and discard a tile from the current player's hand."""
     game_state.turn_number += 1
     drawn_tile = game_state.wall.draw_tile()
     current_player.drawn_tile = drawn_tile
@@ -141,6 +150,7 @@ def draw_and_discard_tile(current_player: Player) -> None:
 
 
 def run_game() -> None:
+    """Main function to run the game."""
     setup_game()
     draw_and_discard_tile(game_state.get_current_player())
     update_current_players()

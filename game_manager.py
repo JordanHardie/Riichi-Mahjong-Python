@@ -7,6 +7,7 @@ HAND_SIZE = 13
 
 
 class DiscardedTile():
+    """Class representing a tile that has been discarded."""
     def __init__(self) -> None:
         self.tile: str = ''
         self.discarded_by: Winds = Winds.EAST
@@ -14,6 +15,7 @@ class DiscardedTile():
 
 
 class CalledTile():
+    """Class representing a tile that has been called (pon, chii, kan, etc.)."""
     def __init__(self) -> None:
         self.tiles: list[str] = []
         self.call_type: Calls = Calls.NONE
@@ -22,6 +24,7 @@ class CalledTile():
 
 
 class Player():
+    """Class representing a player in the game."""
     def __init__(self) -> None:
         self.seat: Winds = Winds.EAST
         self.points: int = 25000
@@ -37,6 +40,7 @@ class Player():
 
 
 class GameState():
+    """Singleton class to manage the game state."""
     _instance = None
 
     def __new__(cls):
@@ -75,6 +79,7 @@ game_state = GameState()
 
 
 def setup_game() -> None:
+    """Setup the game by initializing players and the wall."""
     player_count = int(send_input("How many players?: "))
 
     while player_count not in (3, 4):

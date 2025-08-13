@@ -46,6 +46,7 @@ def get_last_discard() -> str:
 
 
 def is_sequence(tiles: list[str]) -> bool:
+    """Determine if the given tiles form a sequence (1-2-3, 2-3-4, etc.)."""
     tiles = sort_tiles(tiles)
     values, suits = extract_tile_list_values(tiles)
 
@@ -122,6 +123,7 @@ def find_chii_options(hand: list[str], discard: str) -> list[CallOption]:
 
 
 def check_kita(player: Player, call_options: list[CallOption]) -> None:
+    """Check if the player can call Kita (4Z) based on their hand."""
     if game_state.is_three_player and '4Z' in player.hand:
         add_call_option(call_options, Calls.KITA, ['4Z'], set())
 
@@ -134,18 +136,23 @@ def check_set_call(matching_tiles: list[str], last_discard: str, call_options: l
 
 
 def check_chii(player: Player, last_discard: str, call_options: list[CallOption]) -> None:
+    """Check if the player can call Chii based on their hand and the last discard."""
+    if not is_number_tile(last_discard):
+        return
     # Only chii from the player to the left and not in 3-player games.
     if get_next_enum(game_state.previous_player) == game_state.current_player and not game_state.is_three_player:
         call_options.extend(find_chii_options(player.hand, last_discard))
 
 
 def check_added_kan(player: Player, call_options: list[CallOption]) -> None:
+    """Check if the player can call added kan based on their hand."""
     for call in player.calls:
         if call.call_type == Calls.PON and call.tiles and player.drawn_tile == call.tiles[0]:
             add_call_option(call_options, Calls.ADDED_KAN, [player.drawn_tile], {player.drawn_tile})
 
 
 def check_closed_kan(player: Player, call_options: list[CallOption]) -> None:
+    """Check if the player can call closed kan based on their hand."""
     tile_counts: dict[str, int] = {}
     for tile in player.hand:
         tile_counts[tile] = tile_counts.get(tile, 0) + 1
@@ -156,6 +163,7 @@ def check_closed_kan(player: Player, call_options: list[CallOption]) -> None:
 
 
 def can_call(player: Player) -> list[CallOption]:
+    """Determine if the player can make any calls based on their hand and the last discard."""
     last_discard = get_last_discard()
     call_options: list[CallOption] = []
     matching_tiles = [tile for tile in player.hand if tile == last_discard]

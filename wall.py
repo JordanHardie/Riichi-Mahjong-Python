@@ -10,7 +10,19 @@ KAN_DRAW_WALL_SIZE = 4
 
 
 class Wall():
+    """Class representing the wall in Mahjong."""
+    _instance = None
+
+    def __new__(cls):
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(Wall, cls).__new__(cls)
+        return cls.instance
+
     def __init__(self):
+        if hasattr(self, 'initialized'):
+            return
+        self.initialized = True
+
         self.wall: list[str] = []
         self.dead_wall: list[str] = []
         self.kan_draw_stack: list[str] = []
@@ -18,6 +30,8 @@ class Wall():
         self.ura_dora_indicators: list[str] = [] # This one is only a list since it only matters if they are in riichi.
 
     def setup_walls(self, game_state) -> None:
+        """Setup the walls for the game.
+        \n This includes the main wall, dead wall, and kan draw stack."""
         self.setup_main_wall(game_state)
         self.setup_dead_wall()
 
@@ -27,6 +41,8 @@ class Wall():
         return self.draw_tiles(1, wall)[0]
 
     def append_tile_to_wall(self, value: int, suit: int | str, wall: list[str] | None = None) -> None:
+        """Append a tile to the wall.
+        \n If no wall is given it will default to the main wall."""
         if wall == None:
             wall = self.wall
 
@@ -48,6 +64,11 @@ class Wall():
         return tiles
 
     def setup_dead_wall(self) -> None:
+        """Setup the dead wall and kan draw stack."""
+        self.dead_wall.clear()
+        self.kan_draw_stack.clear()
+        self.dora_indicators.clear()
+        self.ura_dora_indicators.clear()
         # Dead wall setup.
         self.dead_wall = self.draw_tiles(-DEAD_WALL_SIZE)
         self.kan_draw_stack = self.dead_wall[:KAN_DRAW_WALL_SIZE]
@@ -62,6 +83,8 @@ class Wall():
                 self.dora_indicators.append({self.dead_wall[i]: False})
 
     def setup_main_wall(self, game_state) -> None:
+        """Setup the main wall with tiles."""
+        self.wall.clear()
         wall  = self.wall
 
         # Main wall setup.
